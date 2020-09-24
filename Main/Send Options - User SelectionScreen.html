@@ -1,0 +1,69 @@
+<html xmlns="http://dynamo.documill.com/schemas/HTMLScreen" id="Main/Send Options - User SelectionScreen.html" name="Main/Send Options - User SelectionScreen.html"><head>
+  <meta charset="utf-8" />
+  <meta content="form" name="dynamo-type" />
+  <link href="Main/style.css" rel="stylesheet" type="dynamo/css" />
+</head>
+
+<body>
+  <div aria-hidden="false" class="screen slds modal" role="dialog">
+    <div class="slds-modal__container">
+      <div class="slds-modal__header">
+        <h2 class="slds-text-heading--medium">Send</h2>
+      </div>
+      <div class="slds-modal__content slds-p-around--medium">
+        <div class="group">
+          <div class="slds-form-element input-block" dyn-if="invalidToValue == false">
+            <label class="slds-form-element__label">To</label>
+            <div class="slds-form-element__control">
+              <input class="slds-input" dyn-value="defaultEmailAddress" name="defaultEmailAddress" placeholder="To" type="text" />
+            </div>
+          </div>
+          <div class="slds-form-element slds-has-error input-block" dyn-if="invalidToValue">
+            <label class="slds-form-element__label">To</label>
+            <div class="slds-form-element__control">
+              <input class="slds-input" dyn-value="defaultEmailAddress" name="defaultEmailAddress" placeholder="To" type="text" />
+            </div>
+            <div class="slds-form-element__help">At least one recipient must be defined</div>
+          </div>
+          <div class="slds-form-element input-block">
+            <label class="slds-form-element__label">Cc</label>
+            <div class="slds-form-element__control">
+              <input class="slds-input" dyn-value="emailCc" name="emailCc" placeholder="Cc" type="text" />
+            </div>
+          </div>
+          <div class="slds-form-element input-block">
+            <label class="slds-form-element__label">Bcc</label>
+            <div class="slds-form-element__control">
+              <input class="slds-input" dyn-value="emailBcc" name="emailBcc" placeholder="Bcc" type="text" />
+            </div>
+          </div>
+          <div class="slds-form-element input-block">
+            <label class="slds-form-element__label">Subject</label>
+            <div class="slds-form-element__control">
+              <input class="slds-input" dyn-value="defaultEmailSubject" name="defaultEmailSubject" placeholder="Subject" type="text" />
+            </div>
+          </div>
+          <p>Body</p>
+          <div id="editable-toolbarContainer">
+          </div>
+          <div class="email-content-container">
+            <div dyn-content="emailContent">
+              Editor area
+            </div>
+          </div>
+          <!-- <p>Attachment <br /></p><p dyn-content="savedFileName">attachment<br /></p> -->
+          <p>Attachments: <a class="form-inline" dyn-content="fileName" dyn-href="documentPDF" href="#" shape="rect">document.pdf  </a> </p>
+        </div>
+      </div>
+      <div class="slds-modal__footer button-group">
+        <button class="slds-button slds-button--neutral" name="Back" type="submit" dyn-next-message="Navigating back..." dyn-next="PDF Preview - User Selection">Back</button>
+        <button class="slds-button slds-button--neutral" name="Close" type="submit" dyn-next-message="Closing...">Close</button>
+        <button class="slds-button slds-button--neutral slds-button--brand" dyn-next="Send Options - End" dyn-next-message="Preparing to Send..." name="Send" type="submit">Send</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+</body></html>

@@ -1,0 +1,22 @@
+<html>
+	<head>	
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta content="email" name="dynamo-type" />
+		<link href="Email Styles/style.css" rel="stylesheet" type="dynamo/css" />
+		<title>Email Template</title>
+	</head>
+	<body>
+		<div class="document">
+      <div dyn-model="emailBody" dyn-model-editorconfig="emailEditorSettings">
+        <p>Type your email here</p>
+        <p>Kind regards,</p>
+        <p>
+          <span class="inline dyn-tagged" dyn-content="User.Signature" dyn-editable="false">&lt;Email Signature in Salesforce&gt;</span>
+        </p>
+        <p>
+          <span class="inline dyn-tagged" dyn-content="User.Name" dyn-editable="false">&lt;Full Name&gt;</span>
+        </p>
+      </div>			
+		</div>
+	</body>
+</html>

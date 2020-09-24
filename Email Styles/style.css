@@ -1,0 +1,63 @@
+.document {
+  font-size: 11pt;
+  font-family: Sans-Serif;
+  color: #000000;
+}
+.document p {
+  margin-top: 0.5em;
+  margin-right: 0;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  font-size: 1em;
+  font-weight: normal;
+}
+.document h1 {
+  margin-top: 0.5em;
+  margin-right: 0;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  font-size: 24pt;
+  font-weight: bold;
+  font-family: Sans-Serif;
+  color: #000000;
+}
+.document h2 {
+  margin-top: 0.5em;
+  margin-right: 0;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  font-size: 18pt;
+  font-weight: bold;
+  color: #000000;
+  font-family: Sans-Serif;
+}
+.document h3 {
+  margin-top: 0.5em;
+  margin-right: 0;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  font-size: 14pt;
+  font-weight: bold;
+  color: #000000;
+  font-family: Sans-Serif;
+}
+.document h4 {
+  margin-top: 0.5em;
+  margin-right: 0;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  font-size: 12pt;
+  font-weight: bold;
+  color: #000000;
+  font-family: Sans-Serif;
+}
+.document h5 {
+  margin-top: 0.5em;
+  margin-right: 0;
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  font-size: 11pt;
+  font-weight: bold;
+  color: #000000;
+  font-family: Sans-Serif;
+}

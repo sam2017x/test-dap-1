@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://dynamo.documill.com/schemas/HTMLScreen" id="Main/Document Edit - User SelectionScreen.html" name="Main/Document Edit - User SelectionScreen.html">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="dynamo-type" content="form" />
+  <link rel="stylesheet" type="dynamo/css" href="Main/style.css" />
+  <link rel="stylesheet" type="dynamo/css" href="Styles/style.css" />
+</head>
+
+<body>
+  <div id="screen-container" class="screen slds">
+    <div id="screen-header">
+      <div id="screen-header-left">
+      </div>
+      <div id="screen-header-center" style="font-size: 1.5em"><span dyn-content="fileName">[Dynamo Document Name]</span></div>
+      <div id="screen-header-right" class="button-group">
+        <button class="form-inline slds-button slds-button--neutral" dyn-if="not empty additionalFiles" dyn-next="Attachments - Start" name="Back" type="submit">Back</button>
+        <button class="slds-button slds-button--neutral" dyn-next-message="Canceling..." name="Cancel" type="submit">Cancel</button>
+        <button class="form-inline slds-button slds-button--neutral slds-button--brand" dyn-next="Document Edit - End" dyn-next-message="Starting Preview..." name="Preview" type="submit">Preview</button>
+      </div>
+    </div>
+    <div id="screen-content">
+      <div id="screen-content-center">
+        <div id="editable-toolbarContainer"></div>
+        <div class="group" id="screen-document" dyn-content="composedMainContent">Main Content document is missing!</div>
+      </div>
+      <div id="screen-content-right" dyn-if="clauseEdit" class="group">
+        <dyn-sfdc-record-picker content-field="dynamo__Clause_Text__c" filter-fields="dynamo__Language__c,dynamo__Category__c,Subcategory__c" name="selectedRecord" object="dynamo__Clause__c" recent-tab-label="Recent Clauses" search-tab-label="Search" title-field="Name"
+        />
+      </div>
+    </div>
+  </div>
+
+
+</body>
+
+</html>

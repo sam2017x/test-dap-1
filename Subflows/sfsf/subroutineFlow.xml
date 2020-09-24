@@ -1,0 +1,15 @@
+<flowSequence xmlns="http://dynamo.documill.com/schemas/flow"
+              xmlns:fl="http://dynamo.documill.com/schemas/taglib/core/flow"
+              id="sfsf"
+              name="Subroutine Flow">
+  <startFlow id="Start">
+    <events>
+      <defaultEvent step="Start subflow" />
+    </events>
+    <steps>
+      <step id="Start subflow" name="Start">
+        <logic />
+      </step>
+    </steps>
+  </startFlow>
+</flowSequence>

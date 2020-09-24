@@ -1,0 +1,97 @@
+@media screen {
+  .document {
+    margin: 12px;
+  }
+}
+
+@page {
+  size: A4;
+}
+
+.document {
+  min-height: 30px;
+  font-family: sans-serif;
+  font-size: 12pt;
+  background-color: white;
+}
+
+.document .group {
+  min-height: 30px;
+  margin: 4px;
+}
+
+.document article {
+  font-family: sans-serif;
+  font-size: 12pt;
+  background-color: white;
+}
+
+.document .large-font {
+  font-size: 20pt;
+}
+
+.document .small-font {
+  font-size: 10pt;
+}
+
+.document .bold {
+  font-weight: bold;
+}
+
+.document .italic {
+  font-style: italic;
+}
+
+.document .align-right {
+  text-align: right;
+}
+
+.document header {
+  margin: 0;
+  height: 30px;
+}
+
+.document footer {
+  margin: 0;
+  height: 30px;
+}
+
+.document h1 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.document p {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.document table {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  margin-top: 8px;
+  margin-bottom: 8px;
+
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.document th {
+  border: 1px solid #ccc;
+}
+
+.document td {
+  border: 1px solid #ccc;
+}
+
+.document .button-group button {
+  margin-right: 10px;
+}

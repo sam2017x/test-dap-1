@@ -1,0 +1,42 @@
+<html xmlns="http://dynamo.documill.com/schemas/HTMLScreen" id="Main/New PreviewScreen.html" name="Main/New PreviewScreen.html">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="form" name="dynamo-type" />
+  <link href="Main/style.css" rel="stylesheet" type="dynamo/css" />
+</head>
+
+<body>
+
+  <div id="screen-container" class="screen slds">
+
+    <div id="screen-header" class="group">
+
+      <div id="screen-header-left">
+        <span style="font-size: 1.5em" dyn-content="fileName">[Dynamo Document Name]</span>
+        <span dyn-if="not empty versionNumberSaved" class="slds-badge" dyn-content="${&#039;ver &#039;}${versionNumberSaved}">[version]</span>
+        <span dyn-if="not empty saveTime">&#160;|&#160;saved </span><span dyn-content="saveTime" dyn-if="not empty saveTime" dyn-content-format="&#039;justTime&#039;">[dateTime]</span>
+      </div>
+      <div id="screen-header-center">
+      </div>
+      <div id="screen-header-right" class="button-group">
+        <button class="form-inline slds-button slds-button--neutral" dyn-if="not empty additionalFiles &amp;&amp; noEdit" dyn-next="Attachments - Start" name="Back" type="submit">Back</button>
+        <button class="form-inline slds-button slds-button--neutral" dyn-if="basicEdit" dyn-next="Compose - Start" name="Back" type="submit">Back</button>
+        <button class="form-inline slds-button slds-button--neutral" dyn-if="clauseEdit" dyn-next="Compose - Start" name="Back" type="submit">Back</button>
+        <button class="form-inline slds-button slds-button--neutral" name="Exit" type="submit">Exit</button>
+        <button class="form-inline slds-button slds-button--brand" dyn-if="saveOption == 'manual'" dyn-next="Save Options - Start" dyn-next-message="Preparing to Save" name="Save" type="submit">Save</button>
+        <button class="form-inline slds-button slds-button--brand" dyn-if="isEmailFeatureEnabled" dyn-next="Send Options - Start" dyn-next-message="Preparing to Send" name="Send" type="submit">Send</button>
+      </div>
+    </div>
+    <div dyn-content="previewMessage" dyn-if="previewMessage != 'null'" id="previewMessageBar" />
+    <div id="screen-content" class="group" dyn-class="previewMessage == 'null' ? 'group' : 'group preview-message-top'">
+      <dyn-pdf-viewer source="${documentPDF}">
+        <div></div>
+      </dyn-pdf-viewer>
+    </div>
+  </div>
+
+
+</body>
+
+</html>

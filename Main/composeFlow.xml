@@ -1,0 +1,450 @@
+
+<flowSequence xmlns="http://dynamo.documill.com/schemas/flow"
+              xmlns:cc="http://dynamo.documill.com/schemas/taglib/core/conditional"
+              xmlns:cl="http://dynamo.documill.com/schemas/taglib/core/loop"
+              xmlns:cv="http://dynamo.documill.com/schemas/taglib/core/var"
+              xmlns:ddoc="http://dynamo.documill.com/schemas/taglib/dynamodoc"
+              xmlns:dt="http://dynamo.documill.com/schemas/taglib/date"
+              xmlns:fl="http://dynamo.documill.com/schemas/taglib/core/flow"
+              xmlns:fo="http://dynamo.documill.com/schemas/taglib/format"
+              xmlns:fs="http://dynamo.documill.com/schemas/taglib/formselect"
+              xmlns:pdf="http://dynamo.documill.com/schemas/taglib/pdf"
+              xmlns:sfch="http://dynamo.documill.com/schemas/taglib/salesforce/chatter"
+              xmlns:sfcrud="http://dynamo.documill.com/schemas/taglib/salesforce/crud"
+              xmlns:sfem="http://dynamo.documill.com/schemas/taglib/salesforce/email"
+              xmlns:sff="http://dynamo.documill.com/schemas/taglib/salesforce/fields"
+              xmlns:sffile="http://dynamo.documill.com/schemas/taglib/salesforce/file"
+              xmlns:soql="http://dynamo.documill.com/schemas/taglib/salesforce/soql"
+              xmlns:wizard="http://dynamo.documill.com/schemas/taglib/wizard"
+              xmlns:cdlg="http://dynamo.documill.com/schemas/taglib/compose/dialog"
+              id="compose"
+              name="Compose Flow">
+  <startFlow id="Before">
+    <events>
+      <defaultEvent step="Initialize" />
+    </events>
+    <steps>
+      <step id="Initialize" message="Initializing..." name="Initialize">
+        <logic>
+          <!-- Record ID -->
+          <cv:set value="${param.id}" var="id" />
+          <!-- Template ID -->
+          <cv:set value="${param.templateId}" var="templateId" hideFromDataTab="true" />
+          <!-- Today variable -->
+          <dt:setDate var="today" />
+          <!-- Objects visible in Salesforce data source -->
+          <!-- Main object -->
+          <sff:record id="mainRecord"
+                      fields="Id"
+                      mainRecord="false"
+                      recordID="${id}"
+                      type="TimeSlot"
+                      var="tim" />
+          <!-- User object -->
+          <sff:record recordID="${UserInfo.getUserId()}" type="User" var="User" fields="Name, Signature, Email" />
+          <!-- Attachments variables -->
+          <cv:setMap var="additionalIndividualFiles" hideFromDataTab="true" />
+          <cv:setMap var="mandatoryIndividualFiles" hideFromDataTab="true" />
+          <cv:setCollection var="mandatoryIndividualFileIds" hideFromDataTab="true" />
+          <cv:set value="false" var="attachAdditionalFilesFromLibrary" hideFromDataTab="true" />
+          <cv:set value="none" var="additionalFilesLibraryId" hideFromDataTab="true" />
+          <cv:set value="false" var="attachAdditionalFilesFromRecord" hideFromDataTab="true" />
+          <!-- Translations variables -->
+          <cv:set value="false" var="translationsEnabled" hideFromDataTab="true" />
+          <cv:set var="selectedLanguage" hideFromDataTab="true" />
+          <cv:set var="languageSFField" hideFromDataTab="true" />
+          <!-- Compose variables -->
+          <cv:setMap var="editorSettings" hideFromDataTab="true">
+            <cv:addMapEntry key="contenteditable-editor" value="basic" />
+            <cv:addMapEntry key="contenteditable-nativespellcheck" value="true" />
+            <cv:addMapEntry key="contenteditable-toolbarcolor" value="#FFFFFF" />
+            <cv:addMapEntry key="contenteditable-filterpaste" value="true" />
+            <cv:addMapEntry key="contenteditable-toolbarcontainer" value="editable-toolbarContainer" />
+          </cv:setMap>
+          <cv:setMap var="emailEditorSettings" hideFromDataTab="true">
+            <cv:addMapEntry key="contenteditable-editor" value="basic" />
+            <cv:addMapEntry key="contenteditable-nativespellcheck" value="true" />
+            <cv:addMapEntry key="contenteditable-toolbarcolor" value="#FFFFFF" />
+            <cv:addMapEntry key="contenteditable-filterpaste" value="true" />
+            <cv:addMapEntry key="contenteditable-toolbarcontainer" value="editable-toolbarContainer" />
+          </cv:setMap>
+          <cv:set value="true" var="noEdit" hideFromDataTab="true" />
+          <cv:set value="false" var="basicEdit" hideFromDataTab="true" />
+          <cv:set value="false" var="clauseEdit" hideFromDataTab="true" />
+          <cv:set value="dynamo/template/${templateId}/output.pdf" var="pathOnClient" hideFromDataTab="true" />
+          <cv:set value="1" var="versionNumber" hideFromDataTab="true" />
+          <!-- Save and Email variables -->
+          <cv:set value="manual" var="saveOption" hideFromDataTab="true" />
+          <cv:set value="false" var="isUserAllowedToEditFileName" hideFromDataTab="true" />
+          <cv:set value="newVersion" var="saveMethod" hideFromDataTab="true" />
+          <cv:set value="mainContentTitle" var="saveFileNameOption" hideFromDataTab="true" />
+          <cv:set value="unnamed" var="customSaveFileName" hideFromDataTab="true" />
+          <cv:set value="false" var="isEmailFeatureEnabled" hideFromDataTab="true" />
+          <cv:set value="Email Template" var="selectedEmailTemplate" hideFromDataTab="true" />
+          <cv:set value="${User.Email}" var="defaultEmailAddress" hideFromDataTab="true" />
+          <cv:set var="defaultEmailSubject" hideFromDataTab="true" />
+          <cv:set var="invalidToValue" value="false" hideFromDataTab="true" />
+          <fl:next step="Define formats" />
+        </logic>
+      </step>
+      <step id="Define formats" name="Define formats">
+        <logic>
+          <!-- Formats -->
+          <fo:setNumberFormat />
+          <fo:setCurrencyFormat />
+          <fo:setPercentageFormat />
+          <fo:setDateFormat />
+          <fo:setDateTimeFormat />
+          <fo:setBooleanFormat />
+          <!-- Determine next step -->
+          <cc:choose>
+            <cc:when test="${basicEdit || clauseEdit}">
+              <fl:next step="Load previous version" />
+            </cc:when>
+            <cc:otherwise>
+              <fl:next step="To Main" />
+            </cc:otherwise>
+          </cc:choose>
+        </logic>
+      </step>
+      <step id="Load previous version" name="Load previous version">
+        <logic>
+          <soql:query select="SELECT ContentDocumentId, ContentDocument.LatestPublishedVersion.PathOnClient, ContentDocument.LatestPublishedVersion.VersionNumber FROM ContentDocumentLink WHERE LinkedEntityId = &apos;${id}&apos; AND ContentDocument.LatestPublishedVersion.PathOnClient = &apos;${pathOnClient}&apos; ORDER BY ContentDocument.ContentModifiedDate DESC LIMIT 1" var="existingContentDocuments" hideFromDataTab="true" />
+          <cc:if test="${not empty existingContentDocuments}">
+            <fl:setMessage message="Loading previous version..." />
+            <sffile:loadLatestContentVersion var="serDoc" contentDocumentId="${existingContentDocuments.ContentDocumentId}" hideFromDataTab="true" />
+            <cv:restoreStringSet prefix="edit_" readFrom="${serDoc}" />
+            <cv:restoreString var="selectedAttachments" key="selectedAttachments" parser="json" readFrom="${serDoc}" hideFromDataTab="true" />
+            <cv:set var="versionNumber" value="${existingContentDocuments.ContentDocument.LatestPublishedVersion.VersionNumber+1}" />
+          </cc:if>
+          <fl:next step="To Main" />
+        </logic>
+      </step>
+      <step id="To Main" name="To Main">
+        <logic>
+          <!-- Empty step. Next segment is Main. -->
+        </logic>
+      </step>
+      <flowStep id="ok" name="ok" sequenceID="asd" sequenceSrc="awd" nextStep="">
+        <initialization />
+      </flowStep>
+    </steps>
+  </startFlow>
+  <standardFlow id="Main">
+    <events>
+      <defaultEvent step="Attachments - Start" />
+    </events>
+    <steps>
+      <step id="Attachments - Start" name="Attachments - Start">
+        <logic>
+          <!-- Get PDF files from SF Library for Additional (Optional) Attachments -->
+          <cc:if test="${attachAdditionalFilesFromLibrary == true}">
+            <soql:query hideFromDataTab="true" select="SELECT Id, Title FROM ContentDocument where ParentId = &apos;${additionalFilesLibraryId}&apos; and FileExtension = &apos;pdf&apos;" var="additionalFilesFromLibrary" />
+          </cc:if>
+          <!-- Get PDF files from Record Attachments -->
+          <cc:if test="${attachAdditionalFilesFromRecord == true}">
+            <soql:query hideFromDataTab="true" select="SELECT Id, Name FROM Attachment WHERE ParentId = &apos;${id}&apos; AND ContentType = &apos;application/pdf&apos;" var="additionalRecordAttachments">
+              <!-- Query the files saved in Salesforce as "Attachment" -->
+            </soql:query>
+            <soql:query hideFromDataTab="true" select="SELECT ContentDocument.Id, ContentDocument.Title FROM ContentDocumentLink Where LinkedEntity.Id = &apos;${id}&apos; AND ContentDocument.FileExtension = &apos;pdf&apos;" var="additionalRecordAttachments_Files">
+              <!-- Query files saved in Salesforce as "Salesforce Files" -->
+            </soql:query>
+          </cc:if>
+          <!-- Create a colletion for additional files. The collection will be used as the source for next step "Attachments - User Selection" -->
+          <cv:setCollection hideFromDataTab="true" var="additionalFiles" />
+          <cl:forEach value="${additionalIndividualFiles}" var="file">
+            <!-- Add individual files into additional collection -->
+            <cv:setMap hideFromDataTab="true" var="fileMap">
+              <cv:addMapEntry key="Id" map="" value="${file.key}" />
+              <cv:addMapEntry key="Title" map="" value="${file.value}" />
+            </cv:setMap>
+            <cv:addItem collection="${additionalFiles}" value="${fileMap}" />
+          </cl:forEach>
+          <cc:if test="${not empty additionalFilesFromLibrary}">
+            <!-- Add files from Salesforce library into additional collection -->
+            <cl:forEach value="${additionalFilesFromLibrary}" var="file">
+              <cv:setMap var="fileMap">
+                <cv:addMapEntry key="Id" map="" value="${file.Id}" />
+                <cv:addMapEntry key="Title" map="" value="${file.Title}" />
+              </cv:setMap>
+              <cv:addItem collection="${additionalFiles}" value="${fileMap}" />
+            </cl:forEach>
+          </cc:if>
+          <cl:forEach value="${additionalRecordAttachments}" var="file">
+            <!-- Add record attachments into additional collection - Saved as "Attachment" -->
+            <cv:setMap var="fileMap">
+              <cv:addMapEntry key="Id" map="" value="${file.Id}" />
+              <cv:addMapEntry key="Title" map="" value="${file.Name}" />
+            </cv:setMap>
+            <cv:addItem collection="${additionalFiles}" value="${fileMap}" />
+          </cl:forEach>
+          <cl:forEach value="${additionalRecordAttachments_Files}" var="file">
+            <!-- Add record attachments into additional collection - Saved as "Salesforce Files" -->
+            <cv:setMap var="fileMap">
+              <cv:addMapEntry key="Id" map="" value="${file.ContentDocument.Id}" />
+              <cv:addMapEntry key="Title" map="" value="${file.ContentDocument.Title}" />
+            </cv:setMap>
+            <cv:addItem collection="${additionalFiles}" value="${fileMap}" />
+          </cl:forEach>
+          <!-- Create a collection for mandatory files. The collection will be automatically merged to the document in the step "PDF Preview - Start" -->
+          <cv:setCollection hideFromDataTab="true" var="mandatoryFiles" />
+          <cl:forEach value="${mandatoryIndividualFileIds}" var="fileId">
+            <cv:addItem collection="${mandatoryFiles}" value="${fileId}" />
+          </cl:forEach>
+          <cv:sortCollection comparableValue="${item.Title}" value="${additionalFiles}" var="additionalFiles" />
+          <cv:setCollection hideFromDataTab="true" var="mandatoryAttachmentsPack" />
+          <!-- Load mandatory attachments from SF -->
+          <cc:if test="${not empty mandatoryFiles}">
+            <fl:setMessage message="Loading Attachments..." />
+            <cl:forEach value="${mandatoryFiles}" var="mandatoryAttachment">
+              <sffile:load hideFromDataTab="true" recordId="${mandatoryAttachment}" var="attachment" />
+              <cv:addItem collection="${mandatoryAttachmentsPack}" value="${attachment}" />
+            </cl:forEach>
+          </cc:if>
+          <!-- Create an PDF package of mandatory attachments -->
+          <cc:if test="${not empty mandatoryAttachmentsPack}">
+            <pdf:mergePDFCollection var="mandatoryAttachmentsPDF" value="${mandatoryAttachmentsPack}" name="MandatoryAttachments.pdf" hideFromDataTab="true" />
+          </cc:if>
+          <cc:choose>
+            <!-- If there is additional files for end-users to select, Dynamo will open the form in Attachments - User Selection, otherwise, skip and go to Compose - Start -->
+            <cc:when test="${not empty additionalFiles}">
+              <!-- Filter out already selected attachments. -->
+              <cv:set var="filteredAdditionalAttachments" value="${additionalFiles}" hideFromDataTab="true" />
+              <cc:if test="${not empty selectedAttachments}">
+                <!-- Remove files that are already added -->
+                <cv:filter var="filteredAdditionalAttachments" value="${additionalFiles}" where="${not selectedAttachments.contains(x.Id)}" />
+                <!-- Create query for selected attachment names. -->
+                <cv:toString var="queryIn" value="${selectedAttachments}" expr="&apos;${x}&apos;" hideFromDataTab="true" />
+                <soql:query var="selectedAttachments" select="SELECT Id, Title FROM ContentDocument where Id in (${queryIn})" hideFromDataTab="true" />
+              </cc:if>
+              <fl:next step="Attachments - User Selection" />
+            </cc:when>
+            <cc:otherwise>
+              <fl:next step="Translations - Start" />
+            </cc:otherwise>
+          </cc:choose>
+        </logic>
+      </step>
+      <screenStep id="Attachments - User Selection" name="Attachments - User Selection" screen="Main/Attachments - User SelectionScreen.html" />
+      <step id="Attachments - End" name="Attachments - End">
+        <logic>
+          <cv:setCollection var="additionalAttachmentsPack" hideFromDataTab="true" />
+          <!-- Load selected optional files from Salesforce -->
+          <cc:if test="${not empty selectedAttachments}">
+            <fl:setMessage message="Loading Attachments..." />
+            <cl:forEach value="${selectedAttachments}" var="selectedAttachment">
+              <sffile:load recordId="${selectedAttachment}" var="attachment" />
+              <cv:addItem collection="${additionalAttachmentsPack}" value="${attachment}" />
+            </cl:forEach>
+          </cc:if>
+          <!-- Create an PDF package of optional attachments -->
+          <cc:if test="${not empty additionalAttachmentsPack}">
+            <pdf:mergePDFCollection var="additionalAttachmentsPDF" value="${additionalAttachmentsPack}" name="AdditionalAttachments.pdf" hideFromDataTab="true" />
+          </cc:if>
+          <fl:next step="Translations - Start" />
+        </logic>
+      </step>
+      <step id="Translations - Start" name="Translations - Start">
+        <logic>
+          <cc:if test="${translationsEnabled}">
+            <cc:choose />
+          </cc:if>
+          <fl:next step="Compose - Start" />
+        </logic>
+      </step>
+      <step id="Compose - Start" message="Composing Document..." name="Compose - Start">
+        <logic>
+          <fl:composeContent editable="true" hideFromDataTab="true" template="Body Content/content.html" var="composedMainContent" />
+          <cv:set var="fileName" value="${composedMainContent.title}" hideFromDataTab="true" />
+          <cv:setCollection hideFromDataTab="true" var="appendices" />
+          <fl:next step="Compose - End" />
+        </logic>
+      </step>
+      <step id="Compose - End" name="Compose - End">
+        <logic>
+          <cc:choose>
+            <cc:when test="${noEdit}">
+              <fl:next step="Save &amp; Send Options" />
+            </cc:when>
+            <cc:otherwise>
+              <fl:next step="Document Edit - Start" />
+            </cc:otherwise>
+          </cc:choose>
+        </logic>
+      </step>
+      <step id="Document Edit - Start" name="Document Edit - Start">
+        <logic>
+          <fl:next step="Document Edit - User Selection" />
+        </logic>
+      </step>
+      <screenStep id="Document Edit - User Selection" name="Document Edit - User Selection" screen="Main/Document Edit - User SelectionScreen.html" />
+      <step id="Document Edit - End" name="Document Edit - End">
+        <logic>
+          <fl:composeContent editable="false" template="Body Content/content.html" var="composedMainContent" />
+          <fl:next step="Save &amp; Send Options" />
+        </logic>
+      </step>
+      <step id="Save &amp; Send Options" name="Save &amp; Send Options">
+        <logic>
+          <cv:set value="${composedMainContent.title}" var="saveFileName" hideFromDataTab="true" />
+          <cv:set value="${saveFileName}.pdf" var="fileName" hideFromDataTab="true" />
+          <fl:next step="PDF Preview - Start" />
+        </logic>
+      </step>
+      <step id="PDF Preview - Start" name="PDF Preview - Start">
+        <logic>
+          <pdf:exportPDF document="${composedMainContent}" var="documentPDF" hideFromDataTab="true" />
+          <cc:if test="${not empty composedCoverPage}">
+            <pdf:exportPDF document="${composedCoverPage}" var="coverPagePDF" hideFromDataTab="true" />
+            <pdf:mergePDF firstDoc="${coverPagePDF}" name="${documentPDF.title}" secondDoc="${documentPDF}" var="documentPDF" hideFromDataTab="true" />
+          </cc:if>
+          <cl:forEach value="${appendices}" var="appendix">
+            <pdf:exportPDF document="${appendix}" var="appendixPDF" hideFromDataTab="true" />
+            <pdf:mergePDF firstDoc="${documentPDF}" name="${documentPDF.title}" secondDoc="${appendixPDF}" var="tempPDF" hideFromDataTab="true" />
+            <cv:set value="${tempPDF}" var="documentPDF" hideFromDataTab="true" />
+          </cl:forEach>
+          <cc:if test="${not empty mandatoryAttachmentsPDF}">
+            <pdf:mergePDF firstDoc="${documentPDF}" name="${documentPDF.title}" secondDoc="${mandatoryAttachmentsPDF}" var="documentPDF" />
+          </cc:if>
+          <cc:if test="${not empty additionalAttachmentsPDF}">
+            <pdf:mergePDF firstDoc="${documentPDF}" name="${documentPDF.title}" secondDoc="${additionalAttachmentsPDF}" var="documentPDF" />
+          </cc:if>
+          <cv:set var="previewMessage" value="null" hideFromDataTab="true" />
+          <cc:choose>
+            <cc:when test="${saveOption == &quot;auto&quot;}">
+              <fl:next step="Auto-Save" label="Auto-saving template" />
+            </cc:when>
+            <cc:otherwise>
+              <fl:next step="PDF Preview - User Selection" />
+            </cc:otherwise>
+          </cc:choose>
+        </logic>
+      </step>
+      <step id="Auto-Save" name="Auto-Save">
+        <logic>
+          <cc:if test="${basicEdit || clauseEdit}">
+            <cv:storeStringSet prefix="edit_" storeTo="${documentPDF}" />
+            <cv:storeString key="selectedAttachments" value="${selectedAttachments}" format="json" storeTo="${documentPDF}" />
+          </cc:if>
+          <cc:if test="${saveFileNameOption == &quot;custom&quot;}">
+            <cv:set var="fileName" value="${customSaveFileName}.pdf" />
+          </cc:if>
+          <cc:choose>
+            <cc:when test="${saveMethod == &quot;newFile&quot;}">
+              <sffile:createContentVersion doc="${documentPDF}" title="${fileName}" linkToId="${id}" pathOnClient="${pathOnClient}" />
+            </cc:when>
+            <cc:otherwise>
+              <soql:query var="existingContentDocuments" select="SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = &apos;${id}&apos; AND ContentDocument.Title = &apos;${fileName}&apos; ORDER BY ContentDocument.ContentModifiedDate DESC LIMIT 1" hideFromDataTab="true" />
+              <cc:choose>
+                <cc:when test="${not empty existingContentDocuments}">
+                  <sffile:createContentVersion contentDocumentId="${existingContentDocuments.ContentDocumentId}" doc="${documentPDF}" title="${fileName}" pathOnClient="${pathOnClient}" />
+                </cc:when>
+                <cc:otherwise>
+                  <sffile:createContentVersion doc="${documentPDF}" title="${fileName}" linkToId="${id}" pathOnClient="${pathOnClient}" />
+                </cc:otherwise>
+              </cc:choose>
+            </cc:otherwise>
+          </cc:choose>
+          <cv:set var="previewMessage" value="The document has been automatically saved to Salesforce as ${fileName}" />
+          <fl:next step="PDF Preview - User Selection" />
+        </logic>
+      </step>
+      <screenStep id="PDF Preview - User Selection" name="PDF Preview - User Selection" screen="Main/PDF Preview - User SelectionScreen.html" />
+      <step id="Save Options - Start" name="Save Options - Start">
+        <logic>
+          <cc:choose>
+            <cc:when test="${isUserAllowedToEditFileName == true}">
+              <cv:set var="userSaveFileName" value="${saveFileName}.pdf" hideFromDataTab="true" />
+              <cc:if test="${saveFileNameOption == &quot;custom&quot;}">
+                <cv:set value="${customSaveFileName}.pdf" var="userSaveFileName" />
+              </cc:if>
+              <fl:next step="Save Options - User Selection" />
+            </cc:when>
+            <cc:otherwise>
+              <fl:next step="Save Options - End" />
+            </cc:otherwise>
+          </cc:choose>
+        </logic>
+      </step>
+      <screenStep id="Save Options - User Selection" name="Save Options - User Selection" screen="Main/Save Options - User SelectionScreen.html" />
+      <step id="Save Options - End" name="Save Options - End">
+        <logic>
+          <cc:if test="${basicEdit || clauseEdit}">
+            <cv:storeStringSet prefix="edit_" storeTo="${documentPDF}" />
+            <cv:storeString key="selectedAttachments" value="${selectedAttachments}" format="json" storeTo="${documentPDF}" />
+          </cc:if>
+          <cc:choose>
+            <cc:when test="${isUserAllowedToEditFileName == true}">
+              <cv:set value="${userSaveFileName}" var="fileName" />
+            </cc:when>
+            <cc:otherwise>
+              <cv:set value="${saveFileName}.pdf" var="fileName" />
+              <cc:if test="${saveFileNameOption == &quot;custom&quot;}">
+                <cv:set value="${customSaveFileName}.pdf" var="fileName" />
+              </cc:if>
+            </cc:otherwise>
+          </cc:choose>
+          <cc:choose>
+            <cc:when test="${saveMethod == &quot;newFile&quot;}">
+              <sffile:createContentVersion doc="${documentPDF}" linkToId="${id}" title="${fileName}" pathOnClient="${pathOnClient}" />
+            </cc:when>
+            <cc:otherwise>
+              <cc:choose>
+                <cc:when test="${not empty existingContentDocuments}">
+                  <sffile:createContentVersion contentDocumentId="${existingContentDocuments.ContentDocumentId}" doc="${documentPDF}" title="${fileName}" pathOnClient="${pathOnClient}" />
+                </cc:when>
+                <cc:otherwise>
+                  <sffile:createContentVersion doc="${documentPDF}" linkToId="${id}" title="${fileName}" pathOnClient="${pathOnClient}" />
+                </cc:otherwise>
+              </cc:choose>
+            </cc:otherwise>
+          </cc:choose>
+          <cv:set value="The document has been saved to Salesforce as ${fileName}" var="previewMessage" />
+          <fl:next step="PDF Preview - User Selection" />
+        </logic>
+      </step>
+      <screenStep id="Save Confirm - User Selection" name="Save Confirm - User Selection" screen="Main/Save Confirm - User SelectionScreen.html" />
+      <step id="Send Options - Start" name="Send Options - Start">
+        <logic>
+          <fl:setMessage message="Preparing Email..." />
+          <cc:choose>
+            <cc:when test="${selectedEmailTemplate == &apos;none&apos;}">
+              <cv:set var="emailContent" hideFromDataTab="true" />
+            </cc:when>
+            <cc:otherwise>
+              <fl:composeContent template="${selectedEmailTemplate}/content.html" var="emailContent" />
+            </cc:otherwise>
+          </cc:choose>
+          <fl:next step="Send Options - User Selection" />
+        </logic>
+      </step>
+      <screenStep id="Send Options - User Selection" name="Send Options - User Selection" screen="Main/Send Options - User SelectionScreen.html" />
+      <step id="Send Options - End" name="Send Options - End" onError="Send Error">
+        <logic>
+          <fl:setMessage message="Sending Email..." />
+          <fl:composeContent template="${selectedEmailTemplate}/content.html" var="emailContent" />
+          <cv:set var="invalidToValue" value="false" />
+          <cc:if test="${defaultEmailAddress == &quot;&quot;}">
+            <cv:set var="invalidToValue" value="true" />
+            <fl:next step="Send Options - User Selection" />
+          </cc:if>
+          <sfem:mail subject="${defaultEmailSubject}">
+            <sfem:to value="${defaultEmailAddress}" />
+            <sfem:cc value="${emailCc}" />
+            <sfem:bcc value="${emailBcc}" />
+            <sfem:htmlBody value="${emailContent}" />
+            <sfem:attachment name="${fileName}" value="${documentPDF}" />
+          </sfem:mail>
+          <cv:set value="The document has been sent" var="previewMessage" />
+          <fl:next step="PDF Preview - User Selection" />
+        </logic>
+      </step>
+      <step id="Send Error" name="Send Error">
+        <logic>
+          <cv:set var="previewMessage" value="null" />
+          <fl:next step="PDF Preview - User Selection" />
+        </logic>
+      </step>
+    </steps>
+  </standardFlow>
+</flowSequence>

@@ -1,0 +1,6 @@
+<metadata xmlns="http://dynamo.documill.com/schemas/dynamoAddIn" xmlns:wizard="http://dynamo.documill.com/schemas/taglib/wizard" template="true"><flowSettings><setting name="advancedUI" value="true"/></flowSettings><templateSettings> 
+		<setting name="type" value="singleuser"/>
+		<setting name="info" value="A blank template that can be connected to any Salesforce Object"/>
+    <setting name="daeVersion" value="1.0"/>
+    <setting name="templateVersion" value="2019-01"/>
+	<setting name="isPublishButtonVisible" value="true"/><setting name="releaseVersion" value="true"/></templateSettings><tabConfiguration currentURL="/app/[AppID]"><tab icon="fa fa-home" label="Home" url="/app/[AppID]" isCloseable="false"/><tab type="" icon="fa fa-random" label="gag" url="/flow/[AppID]/gag/subroutineFlow.xml" isCloseable="true" order="1"/><tab type="" icon="fa fa-random" label="af2" url="/flow/[AppID]/af2/subroutineFlow.xml" isCloseable="true" order="1"/></tabConfiguration></metadata>

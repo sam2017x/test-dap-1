@@ -1,0 +1,37 @@
+<html xmlns="http://dynamo.documill.com/schemas/HTMLScreen" id="Main/Save Options - User SelectionScreen.html" name="Main/Save Options - User SelectionScreen.html"><head>
+	  <meta charset="utf-8" />
+	  <meta content="form" name="dynamo-type" />
+	<link href="Main/style.css" rel="stylesheet" type="dynamo/css" /></head>
+	<body>
+    <div aria-hidden="false" class="screen slds modal" role="dialog">
+      <div class="slds-modal__container">
+        <div class="slds-modal__header">
+          <h2 class="slds-text-heading--medium">Save</h2>
+        </div>
+        <div class="slds-modal__content slds-p-around--medium">
+          <div class="group">
+            <div class="slds-form-element input-block" dyn-if="isUserAllowedToEditFileName">
+    <label class="slds-form-element__label">Title:</label>
+    <div class="slds-form-element__control">
+      <input class="slds-input" dyn-value="userSaveFileName" name="userSaveFileName" placeholder="Type here the filename" type="text" />
+    </div>
+  </div>
+
+            <div class="slds-form-element input-block" dyn-if="not isUserAllowedToEditFileName">
+    <label class="slds-form-element__label">Title:</label>
+    <div class="slds-form-element__control">
+      <input class="slds-input" disabled="true" dyn-value="userSaveFileName" name="userSaveFileName" placeholder="Type here the filename" type="text" />
+    </div>
+  </div>
+          </div>
+        </div>
+        <div class="slds-modal__footer button-group">
+          
+          <button class="slds-button slds-button--neutral " dyn-next="PDF Preview - User Selection" name="Back" type="submit">Back</button>
+          <button class="form-inline slds-button slds-button--neutral" name="Close" type="submit">Close</button><button class="slds-button slds-button--neutral slds-button--brand" dyn-next="Save Options - End" name="Confirm" type="submit">Confirm</button>
+        </div>
+      </div>
+    </div>
+	
+
+</body></html>
